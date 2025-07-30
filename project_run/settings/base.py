@@ -30,6 +30,10 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 
+COMPANY_NAME = "Отдыш & Ко."
+SLOGAN = "Делай вдох. Потом ещё. И ещё. Потом покашляй."
+CONTACTS = "ул. Потной Рванины, д. 69, офис 17"
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
