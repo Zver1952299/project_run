@@ -24,8 +24,8 @@ router = DefaultRouter()
 router.register('api/runs', RunViewSet)
 router.register('api/users', UserViewSet)
 
-urlpatterns = [
+urlpatterns = ([
     path('admin/', admin.site.urls),
     path('api/company_details/', company_details),
     path('', include(router.urls))
-]
+])
