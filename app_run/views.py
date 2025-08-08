@@ -1,9 +1,12 @@
 from rest_framework import viewsets
+from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import status
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 from .models import Run
 from .serializers import RunSerializer, UserSerializer
 
@@ -37,3 +40,31 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         elif user_type == 'coach':
             qs = qs.filter(is_staff=True)
         return qs
+
+
+class RunStatusUpdateView(APIView):
+    allowed_transitions = {
+        'start': (Run.Status.INIT, Run.Status.IN_PROGRESS),
+        'stop': (Run.Status.IN_PROGRESS, Run.Status.FINISHED)
+    }
+
+    def post(self, request, id, action):
+        if action not in self.allowed_transitions:
+            return Response({"detail": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST)
+
+        expected_status, new_status = self.allowed_transitions[action]
+        run = get_object_or_404(Run, id=id)
+
+        if run.status != expected_status:
+            return  Response(
+                {
+                    "detail": f"The run status isn't '{expected_status}'",
+                    "current_status": run.status
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        run.status = new_status
+        run.save()
+        serializer = RunSerializer(run)
+        return Response(serializer.data, status=status.HTTP_200_OK)
