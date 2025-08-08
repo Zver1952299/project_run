@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 class UserSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
-    runs_finished = serializers.SerializerMethodField()
+    runs_finished = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = User
@@ -13,10 +13,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_type(self, obj):
         return 'coach' if obj.is_staff else 'athlete'
-
-    def get_runs_finished(self, obj):
-        runs_finished_count = obj.runs.filter(status=Run.Status.FINISHED).count()
-        return runs_finished_count
 
 
 class UserForRunsSerializer(serializers.ModelSerializer):
