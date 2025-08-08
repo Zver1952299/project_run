@@ -50,7 +50,7 @@ class RunStatusUpdateView(APIView):
 
     def post(self, request, id, action):
         if action not in self.allowed_transitions:
-            return Response({"detail": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
 
         expected_status, new_status = self.allowed_transitions[action]
         run = get_object_or_404(Run, id=id)

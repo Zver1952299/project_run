@@ -20,6 +20,7 @@ from app_run.views import company_details
 from rest_framework.routers import DefaultRouter
 from app_run.views import RunViewSet, UserViewSet, RunStatusUpdateView
 
+
 router = DefaultRouter()
 router.register('api/runs', RunViewSet)
 router.register('api/users', UserViewSet)
