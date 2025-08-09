@@ -116,9 +116,9 @@ class AthleteInfoView(APIView):
         )
         return obj, created
 
-    def build_response(self, obj, created):
+    def build_response(self, obj, created, is_update=False):
         serializer = AthleteInfoSerializer(obj)
-        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        status_code = status.HTTP_201_CREATED if created and is_update else status.HTTP_200_OK
         return Response(serializer.data, status=status_code)
 
     def get(self, request, id):
@@ -138,4 +138,4 @@ class AthleteInfoView(APIView):
                 'weight': weight
             }
         )
-        return self.build_response(obj, created)
+        return self.build_response(obj, created, is_update=True)
