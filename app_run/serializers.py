@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from app_run.models import Run
+from app_run.models import Run, AthleteInfo
 from django.contrib.auth.models import User
 
 
@@ -19,6 +19,12 @@ class UserForRunsSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name']
+
+
+class AthleteInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AthleteInfo
+        fields = ['goals', 'weight', 'user_id']
 
 
 class RunSerializer(serializers.ModelSerializer):

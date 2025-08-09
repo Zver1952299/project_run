@@ -9,8 +9,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
-from .models import Run
-from .serializers import RunSerializer, UserSerializer
+from .models import Run, AthleteInfo
+from .serializers import RunSerializer, UserSerializer, AthleteInfoSerializer
 
 
 @api_view(['GET'])
@@ -80,7 +80,7 @@ class RunStatusUpdateView(APIView):
         run = get_object_or_404(Run, id=id)
 
         if run.status != expected_status:
-            return  Response(
+            return Response(
                 {
                     "detail": f"The run status isn't '{expected_status}'",
                     "current_status": run.status
@@ -92,3 +92,50 @@ class RunStatusUpdateView(APIView):
         run.save()
         serializer = RunSerializer(run)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AthleteInfoView(APIView):
+    def get_user_or_404(self, id):
+        return get_object_or_404(User, id=id)
+
+    def validate_weight(self, weight):
+        if weight is None:
+            return True
+        try:
+            weight = int(weight)
+        except (TypeError, ValueError):
+            return False
+        return 0 < weight < 900
+
+    def get_or_create_athlete_info(self, user_id):
+        self.get_user_or_404(user_id)
+
+        obj, created = AthleteInfo.objects.get_or_create(
+            user_id=user_id,
+            defaults={'goals': '', 'weight': None}
+        )
+        return obj, created
+
+    def build_response(self, obj, created):
+        serializer = AthleteInfoSerializer(obj)
+        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        return Response(serializer.data, status=status_code)
+
+    def get(self, request, id):
+        obj, created = self.get_or_create_athlete_info(id)
+        return self.build_response(obj, created)
+
+    def put(self, request, id):
+        self.get_user_or_404(id)
+
+        weight = request.data.get('weight', None)
+        if not self.validate_weight(weight):
+            return Response({'detail': 'Weight must be > 0 and < 900'}, status=status.HTTP_400_BAD_REQUEST)
+        obj, created = AthleteInfo.objects.update_or_create(
+            user_id=id,
+            defaults={
+                'goals': request.data.get('goals', ''),
+                'weight': weight
+            }
+        )
+        return self.build_response(obj, created)
