@@ -58,7 +58,7 @@ class PositionSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if not(-90.0 <= data['latitude'] <= 90.0):
-            raise serializers.ValidationError('Широта должна быть в диапозоне от -90.0 до 90.0 включительно')
+            raise serializers.ValidationError('Широта должна быть в диапозоне от -90.0 до 90.0 включительно', code=status.HTTP_400_BAD_REQUEST)
         elif not(-180.0 <= data['longitude'] <= 180.0):
-            raise serializers.ValidationError('Долгота должна быть в диапозоне от -180.0 до 180.0 включительно')
+            raise serializers.ValidationError('Долгота должна быть в диапозоне от -180.0 до 180.0 включительно', code=status.HTTP_400_BAD_REQUEST)
         return data
