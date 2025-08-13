@@ -56,9 +56,12 @@ class PositionSerializer(serializers.ModelSerializer):
         else:
             raise serializers.ValidationError('Отрпавить координаты можно только для забега в статусе "in_process"', code=status.HTTP_400_BAD_REQUEST)
 
-    def validate(self, data):
-        if not(-90.0 <= data['latitude'] <= 90.0):
+    def validate_latitude(self, latitude):
+        if not(-90.0 <= latitude <= 90.0):
             raise serializers.ValidationError('Широта должна быть в диапозоне от -90.0 до 90.0 включительно', code=status.HTTP_400_BAD_REQUEST)
-        elif not(-180.0 <= data['longitude'] <= 180.0):
+        return latitude
+
+    def validate_longitude(self, longitude):
+        if not(-180.0 <= longitude <= 180.0):
             raise serializers.ValidationError('Долгота должна быть в диапозоне от -180.0 до 180.0 включительно', code=status.HTTP_400_BAD_REQUEST)
-        return data
+        return longitude
