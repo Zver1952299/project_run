@@ -10,8 +10,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
-from .models import Run, AthleteInfo, Challenge
-from .serializers import RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer
+from .models import Run, AthleteInfo, Challenge, Position
+from .serializers import RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer
 
 
 @api_view(['GET'])
@@ -165,3 +165,10 @@ class ChallengeView(APIView):
             qs = qs.filter(athlete=athlete)
         challenges_list = ChallengeSerializer(qs, many=True).data
         return Response(challenges_list)
+
+
+class PositionViewSet(viewsets.ModelViewSet):
+        queryset = Position.objects.all()
+        serializer_class = PositionSerializer
+        filter_backends = [DjangoFilterBackend]
+        filterset_fields = ['run']

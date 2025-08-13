@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from app_run.models import Run, AthleteInfo, Challenge
+from rest_framework import status
+from app_run.models import Run, AthleteInfo, Challenge, Position
 from django.contrib.auth.models import User
 
 
@@ -42,3 +43,22 @@ class ChallengeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Challenge
         fields = ['full_name', 'athlete']
+
+
+class PositionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Position
+        fields = '__all__'
+
+    def validate_run(self, run):
+        if run.status == Run.Status.IN_PROGRESS:
+            return run
+        else:
+            raise serializers.ValidationError('Отрпавить координаты можно только для забега в статусе "in_process"', code=status.HTTP_400_BAD_REQUEST)
+
+    def validate(self, data):
+        if not(-90.0 <= data['latitude'] <= 90.0):
+            raise serializers.ValidationError('Широта должна быть в диапозоне от -90.0 до 90.0 включительно')
+        elif not(-180.0 <= data['longitude'] <= 180.0):
+            raise serializers.ValidationError('Долгота должна быть в диапозоне от -180.0 до 180.0 включительно')
+        return data
