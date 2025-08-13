@@ -1,11 +1,11 @@
 from rest_framework import serializers
-from app_run.models import Run, AthleteInfo
+from app_run.models import Run, AthleteInfo, Challenge
 from django.contrib.auth.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
-    runs_finished = serializers.IntegerField(read_only=True)
+    runs_finished = serializers.IntegerField()
 
     class Meta:
         model = User
@@ -13,6 +13,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_type(self, obj):
         return 'coach' if obj.is_staff else 'athlete'
+
+    # def get_runs_finished(self, obj):
+    #     return obj.runs.filter(status=Run.Status.FINISHED).count()
 
 
 class UserForRunsSerializer(serializers.ModelSerializer):
@@ -33,3 +36,9 @@ class RunSerializer(serializers.ModelSerializer):
     class Meta:
         model = Run
         fields = '__all__'
+
+
+class ChallengeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Challenge
+        fields = ['full_name', 'athlete']
