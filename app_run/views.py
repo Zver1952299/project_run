@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
 from .models import Run, AthleteInfo, Challenge, Position
 from .serializers import RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer
+from .services.run_service import RunService
 
 
 @api_view(['GET'])
@@ -68,43 +69,13 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RunStatusUpdateView(APIView):
-    allowed_transitions = {
-        'start': (Run.Status.INIT, Run.Status.IN_PROGRESS),
-        'stop': (Run.Status.IN_PROGRESS, Run.Status.FINISHED)
-    }
-
     def post(self, request, id, action):
-        if action not in self.allowed_transitions:
-            return Response({"detail": 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
-
-        expected_status, new_status = self.allowed_transitions[action]
-        run = get_object_or_404(Run, id=id)
-
-        if run.status != expected_status:
-            return Response(
-                {
-                    "detail": f"The run status isn't '{expected_status}'",
-                    "current_status": run.status
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        run.status = new_status
-        run.save()
-
-        if action == 'stop':
-            user = (
-                User.objects
-                .annotate(
-                    runs_finished=Count(
-                        'runs',
-                        filter=Q(runs__status=Run.Status.FINISHED)
-                    )
-                )
-                .get(id=run.athlete_id)
-            )
-            if user.runs_finished == 10:
-                Challenge.objects.create(full_name="Сделай 10 Забегов!", athlete=user)
+        try:
+            run = RunService.update_status(id, action)
+        except ValueError:
+            return Response({"detail": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST)
+        except RuntimeError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = RunSerializer(run)
         return Response(serializer.data, status=status.HTTP_200_OK)
