@@ -1,5 +1,5 @@
 from app_run.models import Run, Challenge
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from haversine import haversine
@@ -25,10 +25,12 @@ class RunService:
         run.status = new_status
 
         if action == 'stop':
-            cls._check_challenges(run)
             run.distance = cls._calculating_distance(run)
+            run.save()
+            cls._check_challenges(run)
 
         run.save()
+
         return run
 
     @staticmethod
@@ -46,6 +48,11 @@ class RunService:
 
         if user.runs_finished == 10:
             Challenge.objects.create(full_name="Сделай 10 Забегов!", athlete=user)
+
+        total_distance = Run.objects.filter(athlete=user).aggregate(sum=Sum('distance'))
+        if total_distance['sum'] >= 50:
+            Challenge.objects.create(full_name="Пробеги 50 километров!", athlete=user)
+
 
     @staticmethod
     def _calculating_distance(run):

@@ -15,9 +15,6 @@ class UserSerializer(serializers.ModelSerializer):
     def get_type(self, obj):
         return 'coach' if obj.is_staff else 'athlete'
 
-    # def get_runs_finished(self, obj):
-    #     return obj.runs.filter(status=Run.Status.FINISHED).count()
-
 
 class UserForRunsSerializer(serializers.ModelSerializer):
     class Meta:
