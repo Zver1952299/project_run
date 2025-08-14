@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework import status
-from app_run.models import Run, AthleteInfo, Challenge, Position
+from app_run.models import Run, AthleteInfo, Challenge, Position, CollectibleItem
 from django.contrib.auth.models import User
 
 
@@ -62,3 +62,9 @@ class PositionSerializer(serializers.ModelSerializer):
         if not(-180.0 <= longitude <= 180.0):
             raise serializers.ValidationError('Долгота должна быть в диапозоне от -180.0 до 180.0 включительно', code=status.HTTP_400_BAD_REQUEST)
         return longitude
+
+
+class CollectibleItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CollectibleItem
+        fields = '__all__'

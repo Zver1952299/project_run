@@ -10,9 +10,10 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
-from .models import Run, AthleteInfo, Challenge, Position
-from .serializers import RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer
+from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem
+from .serializers import RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer
 from .services.run_service import RunService
+from openpyxl import load_workbook
 
 
 @api_view(['GET'])
@@ -139,7 +140,32 @@ class ChallengeView(APIView):
 
 
 class PositionViewSet(viewsets.ModelViewSet):
-        queryset = Position.objects.all()
-        serializer_class = PositionSerializer
-        filter_backends = [DjangoFilterBackend]
-        filterset_fields = ['run']
+    queryset = Position.objects.all()
+    serializer_class = PositionSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['run']
+
+
+class CollectibleItemViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = CollectibleItem.objects.all()
+    serializer_class = CollectibleItemSerializer
+
+
+class UploadFileView(APIView):
+    def post(self, request):
+        uploaded_file = request.FILES.get('file')
+        broken_rows = []
+        if uploaded_file:
+            wb = load_workbook(uploaded_file)
+            ws = wb.active
+            headers = ['picture' if cell.value.lower() == 'url' else cell.value.lower() for cell in ws[1]]
+
+            for row in ws.iter_rows(min_row=2, values_only=True):
+                row_dict = dict(zip(headers, row))
+                serializer = CollectibleItemSerializer(data=row_dict)
+                if serializer.is_valid():
+                    CollectibleItem.objects.create(**row_dict)
+                else:
+                    broken_rows.append(list(row))
+
+        return Response(broken_rows)
