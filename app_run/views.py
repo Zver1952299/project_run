@@ -155,6 +155,7 @@ class UploadFileView(APIView):
     def post(self, request):
         uploaded_file = request.FILES.get('file')
         broken_rows = []
+
         if uploaded_file:
             wb = load_workbook(uploaded_file)
             ws = wb.active
