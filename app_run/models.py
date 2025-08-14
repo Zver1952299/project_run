@@ -16,6 +16,7 @@ class Run(models.Model):
         choices=Status.choices,
         default=Status.INIT
     )
+    distance = models.FloatField(null=True, blank=True)
 
 class AthleteInfo(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info')

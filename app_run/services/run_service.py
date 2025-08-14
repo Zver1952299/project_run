@@ -2,6 +2,7 @@ from app_run.models import Run, Challenge
 from django.db.models import Q, Count
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
+from haversine import haversine
 
 
 class RunService:
@@ -22,11 +23,12 @@ class RunService:
             raise RuntimeError(f"The run status isn't '{expected_status}'")
 
         run.status = new_status
-        run.save()
 
         if action == 'stop':
             cls._check_challenges(run)
+            run.distance = cls._calculating_distance(run)
 
+        run.save()
         return run
 
     @staticmethod
@@ -44,3 +46,13 @@ class RunService:
 
         if user.runs_finished == 10:
             Challenge.objects.create(full_name="Сделай 10 Забегов!", athlete=user)
+
+    @staticmethod
+    def _calculating_distance(run):
+        qs = run.position_set.values()
+        distance = 0
+        if len(qs):
+            for point in range(len(qs) - 1):
+                distance += haversine((qs[point]['latitude'], qs[point]['longitude']), (qs[point + 1]['latitude'], qs[point + 1]['longitude']))
+
+        return round(distance, ndigits=3)
