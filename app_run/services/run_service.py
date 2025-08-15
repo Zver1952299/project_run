@@ -68,8 +68,8 @@ class RunService:
     @staticmethod
     def _calculate_total_distance(run):
         qs = run.position_set.aggregate(
-            pos_earliest=Min('data_time'),
-            pos_latest=Max('data_time')
+            pos_earliest=Min('date_time'),
+            pos_latest=Max('date_time')
         )
         seconds = (qs['pos_latest'] - qs['pos_earliest']).total_seconds()
 
