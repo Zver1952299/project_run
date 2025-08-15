@@ -164,9 +164,16 @@ class UploadFileView(APIView):
             for row in ws.iter_rows(min_row=2, values_only=True):
                 row_dict = dict(zip(headers, row))
                 serializer = CollectibleItemSerializer(data=row_dict)
+                print(f'DEBUG_1 {row_dict}')
+                print(f'DEBUG_1_1 {type(row_dict)}')
+                print(f'DEBUG_2 {serializer.is_valid()}')
+                print(f'DEBUG_3 {serializer.errors}')
+
                 if serializer.is_valid():
                     CollectibleItem.objects.create(**row_dict)
                 else:
+                    print(f'DEBUG_4 {serializer.errors}')
+
                     broken_rows.append(list(row))
 
         return Response(broken_rows)
