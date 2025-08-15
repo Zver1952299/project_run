@@ -160,6 +160,7 @@ class UploadFileView(APIView):
             wb = load_workbook(uploaded_file)
             ws = wb.active
             headers = ['picture' if cell.value.lower() == 'url' else cell.value.lower() for cell in ws[1]]
+            print(f'DEBUG_0.5 {headers}')
 
             for row in ws.iter_rows(min_row=2, values_only=True):
                 row_dict = dict(zip(headers, row))
