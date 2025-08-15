@@ -159,16 +159,11 @@ class UploadFileView(APIView):
         if uploaded_file:
             wb = load_workbook(uploaded_file)
             ws = wb.active
-            headers = ['picture' if cell.value.lower() == 'url' else cell.value.lower() for cell in ws[1]]
-            print(f'DEBUG_0.5 {headers}')
+            headers = ['name', 'uid', 'value', 'latitude', 'longitude', 'picture']
 
             for row in ws.iter_rows(min_row=2, values_only=True):
                 row_dict = dict(zip(headers, row))
                 serializer = CollectibleItemSerializer(data=row_dict)
-                print(f'DEBUG_1 {row_dict}')
-                print(f'DEBUG_1_1 {type(row_dict)}')
-                print(f'DEBUG_2 {serializer.is_valid()}')
-                print(f'DEBUG_3 {serializer.errors}')
 
                 if serializer.is_valid():
                     CollectibleItem.objects.create(**row_dict)
