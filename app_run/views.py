@@ -11,9 +11,10 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
 from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem
-from .serializers import RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer
+from .serializers import RunSerializer, UserSerializer, UserForCollectibleItemSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer
 from .services.run_service import RunService
 from openpyxl import load_workbook
+from haversine import haversine, Unit
 
 
 @api_view(['GET'])
@@ -67,6 +68,14 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         elif user_type == 'coach':
             qs = qs.filter(is_staff=True)
         return qs
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return UserSerializer
+        elif self.action == 'retrieve':
+            return  UserForCollectibleItemSerializer
+        return super().get_serializer_class()
+
 
 
 class RunStatusUpdateView(APIView):
@@ -144,6 +153,15 @@ class PositionViewSet(viewsets.ModelViewSet):
     serializer_class = PositionSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['run']
+
+    def perform_create(self, serializer):
+        position = serializer.save()
+        athlete = User.objects.get(id=position.run.athlete_id)
+        items = CollectibleItem.objects.all()
+        for i in items:
+            distance = haversine((position.latitude, position.longitude), (i.latitude, i.longitude), unit=Unit.METERS)
+            if distance < 100:
+                athlete.collectible_items.add(i)
 
 
 class CollectibleItemViewSet(viewsets.ReadOnlyModelViewSet):
