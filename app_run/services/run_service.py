@@ -63,3 +63,7 @@ class RunService:
                 distance += haversine((qs[point]['latitude'], qs[point]['longitude']), (qs[point + 1]['latitude'], qs[point + 1]['longitude']))
 
         return round(distance, ndigits=3)
+
+    @staticmethod
+    def _calculate_total_distance():
+        pass
