@@ -43,7 +43,7 @@ class ChallengeSerializer(serializers.ModelSerializer):
 
 
 class PositionSerializer(serializers.ModelSerializer):
-    date_time = serializers.DateTimeField(format='%Y-%m-%dT%H:%M:%S.%f', read_only=True)
+    date_time = serializers.DateTimeField(format='%Y-%m-%dT%H:%M:%S.%f', required=False)
 
     class Meta:
         model = Position
