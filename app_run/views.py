@@ -172,8 +172,6 @@ class UploadFileView(APIView):
                 if serializer.is_valid():
                     CollectibleItem.objects.create(**row_dict)
                 else:
-                    print(f'DEBUG_4 {serializer.errors}')
-
                     broken_rows.append(list(row))
 
         return Response(broken_rows)
