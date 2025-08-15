@@ -1,5 +1,5 @@
 from app_run.models import Run, Challenge
-from django.db.models import Q, Count, Sum
+from django.db.models import Q, Count, Sum, Min, Max
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from haversine import haversine
@@ -28,6 +28,7 @@ class RunService:
             run.distance = cls._calculating_distance(run)
             run.save()
             cls._check_challenges(run)
+            run.run_time_seconds = cls._calculate_total_distance(run)
 
         run.save()
 
@@ -65,5 +66,11 @@ class RunService:
         return round(distance, ndigits=3)
 
     @staticmethod
-    def _calculate_total_distance():
-        pass
+    def _calculate_total_distance(run):
+        qs = run.position_set.aggregate(
+            pos_earliest=Min('data_time'),
+            pos_latest=Max('data_time')
+        )
+        seconds = (qs['pos_latest'] - qs['pos_earliest']).total_seconds()
+
+        return seconds
