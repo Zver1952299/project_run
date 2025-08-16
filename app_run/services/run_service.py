@@ -26,10 +26,9 @@ class RunService:
 
         if action == 'stop':
             run.distance = cls._calculating_distance(run)
-            run.save()
-            cls._check_challenges(run)
             run.run_time_seconds = cls._calculate_total_distance(run)
             run.speed = cls._calculate_average_speed(run)
+            cls._check_challenges(run)
 
         run.save()
 
@@ -54,6 +53,9 @@ class RunService:
         total_distance = Run.objects.filter(athlete=user).aggregate(sum=Sum('distance'))
         if total_distance['sum'] >= 50:
             Challenge.objects.create(full_name="Пробеги 50 километров!", athlete=user)
+
+        if run.distance >= 2 and run.run_time_seconds <= 600:
+            Challenge.objects.create(full_name="2 километра за 10 минут!", athlete=user)
 
     @staticmethod
     def _calculating_distance(run):
