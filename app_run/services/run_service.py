@@ -71,6 +71,9 @@ class RunService:
             pos_earliest=Min('date_time'),
             pos_latest=Max('date_time')
         )
+        if not qs['pos_latest'] and not qs['pos_earliest']:
+            return 0
+
         seconds = (qs['pos_latest'] - qs['pos_earliest']).total_seconds()
 
         return seconds
