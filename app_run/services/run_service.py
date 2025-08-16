@@ -51,8 +51,9 @@ class RunService:
             Challenge.objects.create(full_name="Сделай 10 Забегов!", athlete=user)
 
         total_distance = Run.objects.filter(athlete=user).aggregate(sum=Sum('distance'))
-        if total_distance['sum'] >= 50:
-            Challenge.objects.create(full_name="Пробеги 50 километров!", athlete=user)
+        if total_distance['sum']:
+            if total_distance['sum'] >= 50:
+                Challenge.objects.create(full_name="Пробеги 50 километров!", athlete=user)
 
         if run.distance >= 2 and run.run_time_seconds <= 600:
             Challenge.objects.create(full_name="2 километра за 10 минут!", athlete=user)
