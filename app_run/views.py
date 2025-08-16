@@ -163,6 +163,11 @@ class PositionViewSet(viewsets.ModelViewSet):
             if distance < 100:
                 athlete.collectible_items.add(i)
 
+        # positions_of_run = self.queryset.filter(run=position.run)
+        # if len(positions_of_run) == 1:
+
+
+
 
 class CollectibleItemViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CollectibleItem.objects.all()
