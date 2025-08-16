@@ -1,5 +1,5 @@
 from app_run.models import Run, Challenge
-from django.db.models import Q, Count, Sum, Min, Max
+from django.db.models import Q, Count, Sum, Min, Max, Avg
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from haversine import haversine
@@ -29,6 +29,7 @@ class RunService:
             run.save()
             cls._check_challenges(run)
             run.run_time_seconds = cls._calculate_total_distance(run)
+            run.speed = cls._calculate_average_speed(run)
 
         run.save()
 
@@ -54,7 +55,6 @@ class RunService:
         if total_distance['sum'] >= 50:
             Challenge.objects.create(full_name="Пробеги 50 километров!", athlete=user)
 
-
     @staticmethod
     def _calculating_distance(run):
         qs = run.position_set.values()
@@ -77,3 +77,8 @@ class RunService:
         seconds = (qs['pos_latest'] - qs['pos_earliest']).total_seconds()
 
         return seconds
+
+    @staticmethod
+    def _calculate_average_speed(run):
+        average_speed = run.position_set.aggregate(Avg('speed'))
+        return round(average_speed['speed__avg'], ndigits=2)

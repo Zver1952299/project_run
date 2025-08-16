@@ -163,9 +163,14 @@ class PositionViewSet(viewsets.ModelViewSet):
             if distance < 100:
                 athlete.collectible_items.add(i)
 
-        # positions_of_run = self.queryset.filter(run=position.run)
-        # if len(positions_of_run) == 1:
-
+        positions_of_run = self.queryset.filter(run=position.run).values()
+        count_positions = len(positions_of_run)
+        if count_positions > 1:
+            position.distance = round(positions_of_run[count_positions - 2]['distance'] + haversine((positions_of_run[count_positions - 2]['latitude'], positions_of_run[count_positions - 2]['longitude']), (position.latitude, position.longitude)), ndigits=2)
+            distance_the_last_points = round(haversine((positions_of_run[count_positions - 2]['latitude'], positions_of_run[count_positions - 2]['longitude']), (position.latitude, position.longitude), unit=Unit.METERS), ndigits=2)
+            time = (position.date_time - positions_of_run[count_positions - 2]['date_time']).total_seconds()
+            position.speed = round(distance_the_last_points / time, ndigits=2)
+            position.save()
 
 
 
