@@ -1,3 +1,5 @@
+from rest_framework.response import Response
+
 from app_run.models import Run, Challenge
 from django.db.models import Q, Count, Sum, Min, Max, Avg
 from django.shortcuts import get_object_or_404
@@ -85,3 +87,10 @@ class RunService:
     def _calculate_average_speed(run):
         average_speed = run.position_set.aggregate(Avg('speed'))
         return round(average_speed['speed__avg'], ndigits=2)
+
+
+def get_user_or_400(user_id):
+    try:
+        return User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return None

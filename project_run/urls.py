@@ -16,9 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from app_run.views import company_details
+
+from app_run.models import Subscribe
+from app_run.views import company_details, SubscribeView
 from rest_framework.routers import DefaultRouter
-from app_run.views import RunViewSet, UserViewSet, RunStatusUpdateView, AthleteInfoView, ChallengeView, PositionViewSet, CollectibleItemViewSet, UploadFileView
+from app_run.views import RunViewSet, UserViewSet, RunStatusUpdateView, AthleteInfoView, ChallengeView, PositionViewSet, CollectibleItemViewSet, UploadFileView, SubscribeView
 
 router = DefaultRouter()
 router.register('api/runs', RunViewSet)
@@ -33,5 +35,6 @@ urlpatterns = ([
     path('api/athlete_info/<int:id>/', AthleteInfoView.as_view()),
     path('api/challenges/', ChallengeView.as_view()),
     path('api/upload_file/', UploadFileView.as_view()),
+    path('api/subscribe_to_coach/<int:id>/', SubscribeView.as_view()),
     path('', include(router.urls))
 ])

@@ -10,9 +10,9 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
-from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem
+from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem, Subscribe
 from .serializers import RunSerializer, UserSerializer, UserForCollectibleItemSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer
-from .services.run_service import RunService
+from .services.run_service import RunService, get_user_or_400
 from openpyxl import load_workbook
 from haversine import haversine, Unit
 
@@ -199,3 +199,23 @@ class UploadFileView(APIView):
                     broken_rows.append(list(row))
 
         return Response(broken_rows)
+
+
+class SubscribeView(APIView):
+    def post(self, request, id):
+        coach = get_object_or_404(User, id=id)
+        athlete_id = request.data.get('athlete')
+        if not athlete_id.isdigit():
+            return Response({'detail': 'athlete id must be integer'}, status=status.HTTP_400_BAD_REQUEST)
+        athlete = get_user_or_400(user_id=athlete_id)
+        if not athlete:
+            return Response({'detail': 'No User matches the given query.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not athlete.is_staff and coach.is_staff:
+            subscription, created = Subscribe.objects.get_or_create(athlete=athlete, coach=coach)
+            if not created:
+                return Response({'detail': 'Already subscribed'}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({'detail': 'Subscribed successfully'}, status=status.HTTP_200_OK)
+
+        return Response({'detail': 'Only an athlete can subscribe for a coach.'}, status=status.HTTP_400_BAD_REQUEST)
