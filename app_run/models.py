@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.conf import settings
 
 
 class Run(models.Model):
@@ -49,3 +50,19 @@ class CollectibleItem(models.Model):
     picture = models.URLField()
     value = models.IntegerField()
     athletes = models.ManyToManyField(User, related_name='collectible_items')
+
+
+class Subscribe(models.Model):
+    athlete = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='subscriptions'
+    )
+    coach = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='subscribers'
+    )
+
+    class Meta:
+        unique_together = ['athlete', 'coach']
