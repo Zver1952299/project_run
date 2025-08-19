@@ -15,6 +15,7 @@ from .serializers import RunSerializer, UserSerializer, UserForCollectibleItemSe
 from .services.run_service import RunService, get_user_or_400
 from openpyxl import load_workbook
 from haversine import haversine, Unit
+from collections import defaultdict
 
 
 @api_view(['GET'])
@@ -224,3 +225,21 @@ class SubscribeView(APIView):
             return Response({'detail': 'Subscribed successfully'}, status=status.HTTP_200_OK)
 
         return Response({'detail': 'Only an athlete can subscribe for a coach.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChallengeSummaryView(APIView):
+    def get(self, request):
+        challenges = Challenge.objects.select_related('athlete').all()
+        grouped = defaultdict(list)
+        for i in challenges:
+            athlete_data = {
+                    'id': i.athlete_id,
+                    'full_name': i.athlete.first_name + ' ' + i.athlete.last_name,
+                    'username': i.athlete.username
+            }
+            grouped[i.full_name].append(athlete_data)
+        data = [
+            {'name_to_display': name, 'athletes': athletes}
+            for name, athletes in grouped.items()
+        ]
+        return Response(data)
