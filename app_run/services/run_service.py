@@ -30,6 +30,7 @@ class RunService:
             run.distance = cls._calculating_distance(run)
             run.run_time_seconds = cls._calculate_total_distance(run)
             run.speed = cls._calculate_average_speed(run)
+            run.save()
             cls._check_challenges(run)
 
         run.save()
