@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
 from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem, Subscribe
-from .serializers import RunSerializer, UserSerializer, UserForCollectibleItemSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer
+from .serializers import RunSerializer, UserSerializer, UserForCollectibleItemSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer, UserForAthleteSerializer, UserForCoachSerializer
 from .services.run_service import RunService, get_user_or_400
 from openpyxl import load_workbook
 from haversine import haversine, Unit
@@ -73,7 +73,11 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action == 'list':
             return UserSerializer
         elif self.action == 'retrieve':
-            return  UserForCollectibleItemSerializer
+            user = self.get_object()
+            if user.is_staff:
+                return UserForCoachSerializer
+            else:
+                return UserForAthleteSerializer
         return super().get_serializer_class()
 
 
