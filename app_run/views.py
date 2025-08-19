@@ -209,8 +209,9 @@ class SubscribeView(APIView):
     def post(self, request, id):
         coach = get_object_or_404(User, id=id)
         athlete_id = request.data.get('athlete')
-        if not athlete_id.isdigit():
-            return Response({'detail': 'athlete id must be integer'}, status=status.HTTP_400_BAD_REQUEST)
+        if not (type(athlete_id) == int):
+            if not athlete_id.isdigit():
+                return Response({'detail': 'athlete id must be integer'}, status=status.HTTP_400_BAD_REQUEST)
         athlete = get_user_or_400(user_id=athlete_id)
         if not athlete:
             return Response({'detail': 'No User matches the given query.'}, status=status.HTTP_400_BAD_REQUEST)
