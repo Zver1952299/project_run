@@ -86,7 +86,10 @@ class RunService:
     @staticmethod
     def _calculate_average_speed(run):
         average_speed = run.position_set.aggregate(Avg('speed'))
-        return round(average_speed['speed__avg'], ndigits=2)
+        if average_speed['speed__avg']:
+            return round(average_speed['speed__avg'], ndigits=2)
+        else:
+            return 0
 
 
 def get_user_or_400(user_id):
