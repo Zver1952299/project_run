@@ -248,8 +248,8 @@ class ChallengeSummaryView(APIView):
 
 class RatingView(APIView):
     def post(self, request, coach_id):
-        athlete_id = request.POST.get('athlete')
-        rating = request.POST.get('rating')
+        athlete_id = request.data.get('athlete')
+        rating = request.data.get('rating')
         get_object_or_404(User, id=athlete_id)
         coach = get_object_or_404(User, id=coach_id)
         list_athlete_ids = coach.subscribers.values_list("athlete_id", flat=True)
