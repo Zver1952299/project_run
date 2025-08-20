@@ -250,10 +250,12 @@ class RatingView(APIView):
     def post(self, request, coach_id):
         athlete_id = request.data.get('athlete')
         rating = request.data.get('rating')
-        get_object_or_404(User, id=athlete_id)
+        print(f"Coach_id: {coach_id}, athlete_id: {athlete_id}, rating: {rating}")
+        athlete = get_object_or_404(User, id=athlete_id)
         coach = get_object_or_404(User, id=coach_id)
+        print(f"Athlete: {athlete}, coach: {coach}")
         list_athlete_ids = coach.subscribers.values_list("athlete_id", flat=True)
-
+        print(f"List athlete ids: {list_athlete_ids}")
         if int(athlete_id) in list_athlete_ids:
             subscribe = Subscribe.objects.filter(coach_id=coach_id, athlete_id=athlete_id).first()
             if subscribe:
