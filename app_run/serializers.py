@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 class UserSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     runs_finished = serializers.IntegerField()
-    rating = serializers.DecimalField(max_digits=2, decimal_places=1)
+    rating = serializers.FloatField()
 
     class Meta:
         model = User
