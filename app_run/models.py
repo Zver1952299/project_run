@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Run(models.Model):
@@ -62,6 +63,11 @@ class Subscribe(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='subscribers'
+    )
+    rating = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        validators=[MaxValueValidator(1), MaxValueValidator(5)]
     )
 
     class Meta:
