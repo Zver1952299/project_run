@@ -250,7 +250,12 @@ class RatingView(APIView):
     def post(self, request, coach_id):
         athlete_id = request.data.get('athlete')
         rating = request.data.get('rating')
-        athlete = get_object_or_404(User, id=athlete_id)
+        try:
+            athlete = User.objects.get(id=athlete_id)
+        except User.DoesNotExist:
+            return Response({
+                'detail': 'Invalid athlete_id'
+            }, status=status.HTTP_400_BAD_REQUEST)
         coach = get_object_or_404(User, id=coach_id)
         list_athlete_ids = coach.subscribers.values_list("athlete_id", flat=True)
         if int(athlete_id) in list_athlete_ids:
