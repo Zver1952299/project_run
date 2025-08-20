@@ -67,7 +67,7 @@ class Subscribe(models.Model):
     rating = models.PositiveIntegerField(
         null=True,
         blank=True,
-        validators=[MaxValueValidator(1), MaxValueValidator(5)]
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
     )
 
     class Meta:

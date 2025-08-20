@@ -9,9 +9,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Avg
 from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem, Subscribe
-from .serializers import RunSerializer, UserSerializer, UserForCollectibleItemSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer, UserForAthleteSerializer, UserForCoachSerializer
+from .serializers import RunSerializer, UserSerializer, UserForCollectibleItemSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer, UserForAthleteSerializer, UserForCoachSerializer, SubscribeSerializer
 from .services.run_service import RunService, get_user_or_400
 from openpyxl import load_workbook
 from haversine import haversine, Unit
@@ -60,7 +60,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
             runs_finished=Count(
                 'runs',
                 filter=Q(runs__status=Run.Status.FINISHED)
-            )
+            ),
+            rating=Avg('subscribers__rating')
         )
 
         user_type = self.request.query_params.get('type', None)
@@ -243,3 +244,30 @@ class ChallengeSummaryView(APIView):
             for name, athletes in grouped.items()
         ]
         return Response(data)
+
+
+class RatingView(APIView):
+    def post(self, request, coach_id):
+        athlete_id = request.POST.get('athlete')
+        rating = request.POST.get('rating')
+        get_object_or_404(User, id=athlete_id)
+        coach = get_object_or_404(User, id=coach_id)
+        list_athlete_ids = coach.subscribers.values_list("athlete_id", flat=True)
+
+        if int(athlete_id) in list_athlete_ids:
+            subscribe = Subscribe.objects.filter(coach_id=coach_id, athlete_id=athlete_id).first()
+            if subscribe:
+                subscribe.rating = rating
+                serializer = SubscribeSerializer(subscribe, data={'rating': rating}, partial=True)
+                if serializer.is_valid():
+                    subscribe.save()
+                    return Response({
+                        'detail': 'Rating has been saved'
+                    })
+                else:
+                    return Response({'rating': serializer.errors['rating'][0]}, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            return Response({
+                'detail': 'Athlete is not subscribed to coach'
+            }, status=status.HTTP_400_BAD_REQUEST)

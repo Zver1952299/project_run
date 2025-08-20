@@ -1,19 +1,21 @@
 from rest_framework import serializers
 from rest_framework import status
-from app_run.models import Run, AthleteInfo, Challenge, Position, CollectibleItem
+from app_run.models import Run, AthleteInfo, Challenge, Position, CollectibleItem, Subscribe
 from django.contrib.auth.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     runs_finished = serializers.IntegerField()
+    rating = serializers.DecimalField(max_digits=2, decimal_places=1)
 
     class Meta:
         model = User
-        fields = ['id', 'date_joined', 'username', 'last_name', 'first_name', 'type', 'runs_finished']
+        fields = ['id', 'date_joined', 'username', 'last_name', 'first_name', 'type', 'runs_finished', 'rating']
 
     def get_type(self, obj):
         return 'coach' if obj.is_staff else 'athlete'
+
 
 
 class UserForRunsSerializer(serializers.ModelSerializer):
@@ -102,3 +104,13 @@ class UserForAthleteSerializer(UserForCollectibleItemSerializer):
             return coaches[0]
         else:
             return None
+
+class SubscribeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscribe
+        fields = '__all__'
+
+    def validate_rating(self, value):
+        if value is not None and not (1 <= value <=5):
+            raise serializers.ValidationError("Rating must be between 1 and 5")
+        return value
