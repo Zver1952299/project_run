@@ -10,6 +10,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q, Avg, Sum, ExpressionWrapper, F, FloatField, Case, When, Value
+from django.db.models.functions import NullIf
 from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem, Subscribe
 from .serializers import RunSerializer, UserSerializer, UserForCollectibleItemSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer, UserForAthleteSerializer, UserForCoachSerializer, SubscribeSerializer
 from .services.run_service import RunService, get_user_or_400
@@ -308,7 +309,9 @@ class AnalyticView(APIView):
             .values('athlete_id')
             .annotate(
                 avg_speed=Avg(
-                    ExpressionWrapper(F('distance') / (F('run_time_seconds') / 3600),output_field=FloatField())
+                    ExpressionWrapper(
+                        F("distance") / (NullIf(F("run_time_seconds"), Value(0)) / 3600), output_field=FloatField()
+                    )
                 )
             )
             .order_by('-avg_speed')
@@ -316,6 +319,7 @@ class AnalyticView(APIView):
         )
         print(f'DEBUG {speed_avg}')
         print(f'DEBUG {speed_avg['avg_speed']}')
+
 
         return Response(
             {
