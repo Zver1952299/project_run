@@ -303,21 +303,6 @@ class AnalyticView(APIView):
             .first()
         )
 
-        # speed_avg = (
-        #     Run.objects
-        #     .filter(athlete_id__in=athlete_ids, status=Run.Status.FINISHED)
-        #     .values('athlete_id')
-        #     .annotate(
-        #         total_distance=Sum("distance"),
-        #         total_time=Sum("run_time_seconds"),
-        #     )
-        #     .annotate(
-        #         avg_speed=(F("total_distance") * 1000) / F("total_time")
-        #     )
-        #     .order_by('-avg_speed')
-        #     .first()
-        # )
-
         speed_avg = (
             Run.objects
             .filter(athlete_id__in=athlete_ids, status=Run.Status.FINISHED)
