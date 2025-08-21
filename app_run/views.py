@@ -309,8 +309,12 @@ class AnalyticView(APIView):
             .values('athlete_id')
             .annotate(
                 avg_speed=Avg(
-                    ExpressionWrapper(
-                        F("distance") / (NullIf(F("run_time_seconds"), Value(0)) / 3600), output_field=FloatField()
+                    Case(
+                        When(
+                            run_time_seconds__gt=0,
+                            then=F("distance") / (F("run_time_seconds") / 3600)),
+                            default=None,
+                            output_field=FloatField()
                     )
                 )
             )
