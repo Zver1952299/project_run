@@ -310,7 +310,7 @@ class AnalyticView(APIView):
             .annotate(
                 avg_speed=Avg(
                     ExpressionWrapper(
-                        F('distance') / (Cast(F('run_time_seconds'), FloatField()) / 3600.0),
+                        (F('distance') * 1000) / (Cast(F('run_time_seconds'), FloatField())),
                          output_field=FloatField()
                     )
                 )
