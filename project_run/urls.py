@@ -1,26 +1,11 @@
-"""
-URL configuration for project_run project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
 
-from app_run.models import Subscribe
-from app_run.views import company_details, SubscribeView
+from app_run.views import company_details
 from rest_framework.routers import DefaultRouter
 from app_run.views import RunViewSet, UserViewSet, RunStatusUpdateView, AthleteInfoView, ChallengeView, PositionViewSet, CollectibleItemViewSet, UploadFileView, SubscribeView, ChallengeSummaryView, RatingView, AnalyticView
+# from rest_framework.authtoken import views as drf_auth_views
+
 
 router = DefaultRouter()
 router.register('api/runs', RunViewSet)
@@ -39,5 +24,6 @@ urlpatterns = ([
     path('api/subscribe_to_coach/<int:id>/', SubscribeView.as_view()),
     path('api/rate_coach/<int:coach_id>/', RatingView.as_view()),
     path('api/analytics_for_coach/<int:coach_id>/', AnalyticView.as_view()),
+    # path('api/token/', drf_auth_views.obtain_auth_token),
     path('', include(router.urls))
 ])

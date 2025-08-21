@@ -17,7 +17,6 @@ class UserSerializer(serializers.ModelSerializer):
         return 'coach' if obj.is_staff else 'athlete'
 
 
-
 class UserForRunsSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

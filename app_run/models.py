@@ -23,6 +23,7 @@ class Run(models.Model):
     run_time_seconds = models.PositiveIntegerField(default=0)
     speed = models.FloatField(default=0.0)
 
+
 class AthleteInfo(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info')
     goals = models.TextField(blank=True)
