@@ -304,21 +304,18 @@ class AnalyticView(APIView):
 
         speed_avg = (
             Run.objects
-            .filter(athlete_id__in=athlete_ids, status=Run.Status.FINISHED, run_time_seconds__gt=0)
+            .filter(run_time_seconds__gt=0, athlete_id__in=athlete_ids, status=Run.Status.FINISHED)
             .values('athlete_id')
-            .annotate(avg_speed=Avg(
-                Case(
-                    When(run_time_seconds__gt=0,
-                        then=ExpressionWrapper(F('distance') / (F('run_time_seconds') / 3600),
-                                            output_field=FloatField())),
-                    default=Value(0.0),
-                    output_field=FloatField()
-            )
-        )
+            .annotate(
+                avg_speed=Avg(
+                    ExpressionWrapper(F('distance') / (F('run_time_seconds') / 3600),output_field=FloatField())
+                )
             )
             .order_by('-avg_speed')
             .first()
         )
+        print(f'DEBUG {speed_avg}')
+        print(f'DEBUG {speed_avg['avg_speed']}')
 
         return Response(
             {
