@@ -308,11 +308,13 @@ class AnalyticView(APIView):
             .filter(run_time_seconds__gt=0, athlete_id__in=athlete_ids, status=Run.Status.FINISHED)
             .values('athlete_id')
             .annotate(
-                avg_speed=Avg(
-                    ExpressionWrapper(
-                        (F('distance') * 1000) / (Cast(F('run_time_seconds'), FloatField())),
-                         output_field=FloatField()
-                    )
+                total_distance=Sum("distance"),
+                total_time=Sum("run_time_seconds"),
+            )
+            .annotate(
+                avg_speed=ExpressionWrapper(
+                    F("total_distance") / Cast(F("total_time"), FloatField()),
+                    output_field=FloatField(),
                 )
             )
             .order_by('-avg_speed')
