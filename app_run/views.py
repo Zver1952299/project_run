@@ -303,18 +303,27 @@ class AnalyticView(APIView):
             .first()
         )
 
+        # speed_avg = (
+        #     Run.objects
+        #     .filter(athlete_id__in=athlete_ids, status=Run.Status.FINISHED)
+        #     .values('athlete_id')
+        #     .annotate(
+        #         total_distance=Sum("distance"),
+        #         total_time=Sum("run_time_seconds"),
+        #     )
+        #     .annotate(
+        #         avg_speed=(F("total_distance") * 1000) / F("total_time")
+        #     )
+        #     .order_by('-avg_speed')
+        #     .first()
+        # )
+
         speed_avg = (
             Run.objects
             .filter(athlete_id__in=athlete_ids, status=Run.Status.FINISHED)
             .values('athlete_id')
-            .annotate(
-                total_distance=Sum("distance"),
-                total_time=Sum("run_time_seconds"),
-            )
-            .annotate(
-                avg_speed=(F("total_distance") * 1000) / F("total_time")
-            )
-            .order_by('-avg_speed')
+            .annotate(avg_speed_m_s=Avg('speed'))
+            .order_by('-avg_speed_m_s')
             .first()
         )
 
@@ -327,6 +336,6 @@ class AnalyticView(APIView):
                 "total_run_value": total_run["total_distance"] if total_run else None,
 
                 "speed_avg_user": speed_avg["athlete_id"] if speed_avg else None,
-                "speed_avg_value": speed_avg["avg_speed"] if speed_avg else None,
+                "speed_avg_value": speed_avg["avg_speed_m_s"] if speed_avg else None,
             }
         )
