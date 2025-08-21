@@ -314,7 +314,9 @@ class AnalyticView(APIView):
             .order_by('-avg_speed')
             .first()
         )
-
+        print(f"DEBUG {speed_avg["avg_speed"]}")
+        print(f"DEBUG {speed_avg["avg_speed"]:.2f}")
+        print(f"DEBUG {type(speed_avg["avg_speed"])}")
 
         return Response(
             {
