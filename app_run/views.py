@@ -9,7 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from django.db.models import Count, Q, Avg, Sum, ExpressionWrapper, F, FloatField, Case, When, Value
+from django.db.models import Count, Q, Avg, Sum, ExpressionWrapper, F, FloatField, Case, When, Value, DecimalField
 from django.db.models.functions import Cast
 from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem, Subscribe
 from .serializers import RunSerializer, UserSerializer, UserForCollectibleItemSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer, UserForAthleteSerializer, UserForCoachSerializer, SubscribeSerializer
@@ -313,8 +313,8 @@ class AnalyticView(APIView):
             )
             .annotate(
                 avg_speed=ExpressionWrapper(
-                    (F("total_distance") * 1000) / Cast(F("total_time"), FloatField()),
-                    output_field=FloatField(),
+                    F("total_distance") / Cast(F("total_time"), DecimalField(max_digits=6, decimal_places=2)),
+                    output_field=DecimalField(max_digits=6, decimal_places=2),
                 )
             )
             .order_by('-avg_speed')
