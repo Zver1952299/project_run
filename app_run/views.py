@@ -308,15 +308,12 @@ class AnalyticView(APIView):
             .values('athlete_id')
             .annotate(
                 avg_speed=Avg(
-                    ExpressionWrapper(F('distance') / F('run_time_seconds'), output_field=FloatField())
+                    ExpressionWrapper((F('distance') / 1000) / (F('run_time_seconds') / 3600), output_field=FloatField())
                 )
             )
             .order_by('-avg_speed')
             .first()
         )
-        print(f"DEBUG {speed_avg["avg_speed"]}")
-        print(f"DEBUG {speed_avg["avg_speed"]:.2f}")
-        print(f"DEBUG {type(speed_avg["avg_speed"])}")
 
         return Response(
             {
