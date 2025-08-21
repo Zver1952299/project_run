@@ -312,7 +312,7 @@ class AnalyticView(APIView):
                 total_time=Sum("run_time_seconds"),
             )
             .annotate(
-                avg_speed=(F("total_distance") * 1000) / F("total_time")
+                avg_speed=(F("total_distance") * 3600) / F("total_time")
             )
             # .order_by('-avg_speed')
             # .first()
