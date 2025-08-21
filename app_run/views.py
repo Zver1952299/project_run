@@ -9,7 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from django.db.models import Count, Q, Avg, Sum, ExpressionWrapper, F, FloatField
+from django.db.models import Count, Q, Avg, Sum, ExpressionWrapper, F, FloatField, Case, When
 from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem, Subscribe
 from .serializers import RunSerializer, UserSerializer, UserForCollectibleItemSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer, UserForAthleteSerializer, UserForCoachSerializer, SubscribeSerializer
 from .services.run_service import RunService, get_user_or_400
@@ -308,7 +308,11 @@ class AnalyticView(APIView):
             .values('athlete_id')
             .annotate(
                 avg_speed=Avg(
-                    ExpressionWrapper((F('distance') / 1000) / (F('run_time_seconds') / 3600), output_field=FloatField())
+                    ExpressionWrapper(
+                        Case(
+                            When(run_time_seconds__gt=0, then=F('distance') / (F('run_time_seconds') / 3600)),
+                                default=0.0
+                            ), output_field=FloatField())
                 )
             )
             .order_by('-avg_speed')
