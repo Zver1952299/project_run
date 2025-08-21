@@ -9,7 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from django.db.models import Count, Q, Avg
+from django.db.models import Count, Q, Avg, Sum, ExpressionWrapper, F, FloatField
 from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem, Subscribe
 from .serializers import RunSerializer, UserSerializer, UserForCollectibleItemSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer, UserForAthleteSerializer, UserForCoachSerializer, SubscribeSerializer
 from .services.run_service import RunService, get_user_or_400
@@ -279,3 +279,52 @@ class RatingView(APIView):
             return Response({
                 'detail': 'Athlete is not subscribed to coach'
             }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AnalyticView(APIView):
+    def get(self, request, coach_id):
+        athlete_ids = Subscribe.objects.filter(coach_id=coach_id).values_list('athlete_id', flat=True)
+
+        longest_run = (
+            Run.objects
+            .filter(athlete_id__in=athlete_ids, status=Run.Status.FINISHED)
+            .order_by('-distance')
+            .values('athlete_id', 'distance')
+            .first()
+        )
+
+        total_run = (
+            Run.objects
+            .filter(athlete_id__in=athlete_ids, status=Run.Status.FINISHED)
+            .values('athlete_id')
+            .annotate(total_distance=Sum('distance'))
+            .order_by('-total_distance')
+            .first()
+        )
+
+        speed_avg = (
+            Run.objects
+            .filter(athlete_id__in=athlete_ids, status=Run.Status.FINISHED)
+            .values('athlete_id')
+            .annotate(
+                avg_speed=Avg(
+                    ExpressionWrapper(F('distance') / F('run_time_seconds'), output_field=FloatField())
+                )
+            )
+            .order_by('-avg_speed')
+            .first()
+        )
+
+
+        return Response(
+            {
+                "longest_run_user": longest_run["athlete_id"] if longest_run else None,
+                "longest_run_value": longest_run["distance"] if longest_run else None,
+
+                "total_run_user": total_run["athlete_id"] if total_run else None,
+                "total_run_value": total_run["total_distance"] if total_run else None,
+
+                "speed_avg_user": speed_avg["athlete_id"] if speed_avg else None,
+                "speed_avg_value": speed_avg["avg_speed"] if speed_avg else None,
+            }
+        )
