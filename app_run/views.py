@@ -314,8 +314,6 @@ class AnalyticView(APIView):
             .order_by('-avg_speed')
             .first()
         )
-        print(f"DEBUG {speed_avg['avg_speed']}")
-        print(f"DEBUG {type(speed_avg['avg_speed'])}")
 
 
         return Response(
@@ -327,6 +325,6 @@ class AnalyticView(APIView):
                 "total_run_value": total_run["total_distance"] if total_run else None,
 
                 "speed_avg_user": speed_avg["athlete_id"] if speed_avg else None,
-                "speed_avg_value": round(float(speed_avg["avg_speed"]), 2) if speed_avg else None,
+                "speed_avg_value": f'{float(speed_avg["avg_speed"]):.2f}' if speed_avg else None,
             }
         )
