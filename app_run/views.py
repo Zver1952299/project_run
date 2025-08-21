@@ -304,7 +304,7 @@ class AnalyticView(APIView):
 
         speed_avg = (
             Run.objects
-            .filter(athlete_id__in=athlete_ids, status=Run.Status.FINISHED)
+            .filter(athlete_id__in=athlete_ids, status=Run.Status.FINISHED, run_time_seconds__gt=0)
             .values('athlete_id')
             .annotate(
                 avg_speed=Avg(
