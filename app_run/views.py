@@ -330,6 +330,6 @@ class AnalyticView(APIView):
                 "total_run_value": total_run["total_distance"] if total_run else None,
 
                 "speed_avg_user": speed_avg["athlete_id"] if speed_avg else None,
-                "speed_avg_value": speed_avg["avg_speed"] if speed_avg else None,
+                "speed_avg_value": 0.00 if speed_avg["avg_speed"] < 0.1 else speed_avg["avg_speed"] if speed_avg else None,
             }
         )
